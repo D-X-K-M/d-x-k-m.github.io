@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Sierpinski Sieve</title>
+    
+    
+
+<script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Basic styling for body and canvas */
+        body {
+            font-family: 'Inter', sans-serif; /* Use Inter font */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f3f4f6; /* Tailwind gray-100 */
+            margin: 0;
+            padding: 1rem; /* Add padding for smaller screens */
+            box-sizing: border-box;
+        }
+        canvas {
+            display: block;
+            /* background-color: white; <- Removed: Background is now dynamic */
+            border-radius: 0.5rem; /* Rounded corners */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow */
+        }
+        .controls {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem; /* Rounded corners */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow */
+            margin-top: 1rem;
+            width: 100%;
+            max-width: 500px; /* Limit control width */
+            display: grid; /* Use grid for layout */
+            gap: 1rem; /* Space between controls */
+        }
+        /* Style slider */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #d1d5db; /* Tailwind gray-300 */
+            border-radius: 5px;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+            cursor: pointer;
+        }
+        input[type="range"]:hover {
+            opacity: 1;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #3b82f6; /* Tailwind blue-500 */
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #3b82f6; /* Tailwind blue-500 */
+            border-radius: 50%;
+            cursor: pointer;
+            border: none; /* Remove default border in Firefox */
+        }
+        /* Style color picker */
+        input[type="color"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 40px; /* Adjust size */
+            height: 40px; /* Adjust size */
+            background-color: transparent; /* Remove default background */
+            border: none;
+            cursor: pointer;
+            border-radius: 0.25rem; /* Slightly rounded */
+            padding: 0; /* Remove padding */
+            border: 1px solid #d1d5db; /* Add a subtle border */
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+             border-radius: 0.25rem;
+        }
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 0.25rem;
+        }
+         input[type="color"]::-moz-color-swatch {
+            border: none;
+            border-radius: 0.25rem;
+        }
+
+        /* Ensure container centers content */
+        .container {
+             display: flex;
+             flex-direction: column;
+             align-items: center;
+             width: 100%;
+             max-width: 600px; /* Max width for the whole component */
+        }
+        /* Style control groups */
+        .control-group {
+            display: flex;
+            flex-direction: column; /* Stack label and input vertically */
+        }
+        .color-control-group {
+            display: flex;
+            align-items: center; /* Align label and color input horizontally */
+            gap: 0.5rem; /* Space between label and color input */
+            justify-content: space-between; /* Space out label and picker */
+        }
+    </style>
+     
+<link rel="preconnect" href="https://fonts.googleapis.com">
+     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container mx-auto p-4">
+        <h1 class="text-2xl font-bold text-center mb-4 text-gray-700">Sierpinski Sieve Generator</h1>
+
+        <canvas id="sierpinskiCanvas" width="500" height="450" class="rounded-lg shadow-md"></canvas>
+
+        <div class="controls mt-4 p-6 bg-white rounded-lg shadow-md w-full max-w-md">
+            
+            <div class="control-group">
+                <label for="levelSlider" class="block mb-1 text-sm font-medium text-gray-700">Recursion Level: <span id="levelValue">3</span></label>
+                <input type="range" id="levelSlider" min="0" max="8" value="3" class="w-full">
+            </div>
+            
+            <div class="color-control-group">
+                 <label for="colorPicker" class="text-sm font-medium text-gray-700">Triangle Color:</label>
+                 <input type="color" id="colorPicker" value="#3b82f6"> 
+            </div>
+             
+            <div class="color-control-group">
+                 <label for="backgroundColorPicker" class="text-sm font-medium text-gray-700">Background Color:</label>
+                 <input type="color" id="backgroundColorPicker" value="#ffffff"> 
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Canvas Setup ---
+        const canvas = document.getElementById('sierpinskiCanvas');
+        const ctx = canvas.getContext('2d');
+        const levelSlider = document.getElementById('levelSlider');
+        const levelValueSpan = document.getElementById('levelValue');
+        const colorPicker = document.getElementById('colorPicker');
+        const backgroundColorPicker = document.getElementById('backgroundColorPicker'); // Get background color picker
+
+        let canvasWidth = canvas.width;
+        let canvasHeight = canvas.height;
+        let currentLevel = parseInt(levelSlider.value, 10);
+        let currentColor = colorPicker.value;
+        let currentBackgroundColor = backgroundColorPicker.value; // Initialize background color
+
+        // --- Drawing Functions ---
+
+        /**
+         * Draws a single triangle.
+         * @param {object} p1 - First vertex {x, y}
+         * @param {object} p2 - Second vertex {x, y}
+         * @param {object} p3 - Third vertex {x, y}
+         * @param {string} color - Fill color for the triangle
+         */
+        function drawTriangle(p1, p2, p3, color) {
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.lineTo(p3.x, p3.y);
+            ctx.closePath();
+            ctx.fillStyle = color; // Use the provided triangle color
+            ctx.fill();
+        }
+
+        /**
+         * Calculates the midpoint between two points.
+         * @param {object} p1 - First point {x, y}
+         * @param {object} p2 - Second point {x, y}
+         * @returns {object} - Midpoint {x, y}
+         */
+        function getMidpoint(p1, p2) {
+            return {
+                x: (p1.x + p2.x) / 2,
+                y: (p1.y + p2.y) / 2
+            };
+        }
+
+        /**
+         * Recursively draws the Sierpinski triangle.
+         * @param {object} p1 - First vertex of the current triangle
+         * @param {object} p2 - Second vertex of the current triangle
+         * @param {object} p3 - Third vertex of the current triangle
+         * @param {number} level - Current recursion depth
+         */
+        function drawSierpinski(p1, p2, p3, level) {
+            // Base case: Stop recursion and draw the triangle using the currentColor
+            if (level === 0) {
+                // Important: drawTriangle sets its own fillStyle
+                drawTriangle(p1, p2, p3, currentColor);
+                return;
+            }
+
+            // Calculate midpoints
+            const mid12 = getMidpoint(p1, p2);
+            const mid23 = getMidpoint(p2, p3);
+            const mid31 = getMidpoint(p3, p1);
+
+            // Recursively draw the three smaller triangles
+            drawSierpinski(p1, mid12, mid31, level - 1);
+            drawSierpinski(mid12, p2, mid23, level - 1);
+            drawSierpinski(mid31, mid23, p3, level - 1);
+        }
+
+        /**
+         * Clears the canvas, fills the background, and redraws the Sierpinski triangle.
+         */
+        function redraw() {
+            // 1. Clear the entire canvas
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            // 2. Fill the background with the selected color
+            ctx.fillStyle = currentBackgroundColor;
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+            // 3. Draw the fractal (drawSierpinski uses currentColor internally via drawTriangle)
+            const padding = 20;
+            const triangleBaseWidth = canvasWidth - 2 * padding;
+            const triangleHeight = Math.sqrt(3) / 2 * triangleBaseWidth;
+            let topY, bottomY;
+
+            if (triangleHeight > canvasHeight - 2 * padding) {
+                bottomY = canvasHeight - padding;
+                topY = padding;
+                const scale = (canvasHeight - 2 * padding) / triangleHeight;
+                const scaledWidth = triangleBaseWidth * scale;
+                const widthPadding = (canvasWidth - scaledWidth) / 2;
+                const p1 = { x: canvasWidth / 2, y: topY };
+                const p2 = { x: widthPadding, y: bottomY };
+                const p3 = { x: canvasWidth - widthPadding, y: bottomY };
+                drawSierpinski(p1, p2, p3, currentLevel);
+            } else {
+                const yOffset = (canvasHeight - triangleHeight) / 2;
+                topY = yOffset;
+                bottomY = yOffset + triangleHeight;
+                const p1 = { x: canvasWidth / 2, y: topY };
+                const p2 = { x: padding, y: bottomY };
+                const p3 = { x: canvasWidth - padding, y: bottomY };
+                drawSierpinski(p1, p2, p3, currentLevel);
+            }
+        }
+
+        // --- Event Listeners ---
+
+        // Update level and redraw
+        levelSlider.addEventListener('input', (event) => {
+            currentLevel = parseInt(event.target.value, 10);
+            levelValueSpan.textContent = currentLevel;
+            window.requestAnimationFrame(redraw);
+        });
+
+        // Update triangle color and redraw
+        colorPicker.addEventListener('input', (event) => {
+            currentColor = event.target.value;
+            window.requestAnimationFrame(redraw);
+        });
+
+        // Update background color and redraw
+        backgroundColorPicker.addEventListener('input', (event) => {
+            currentBackgroundColor = event.target.value;
+            window.requestAnimationFrame(redraw); // Redraw when background changes
+        });
+
+
+        // --- Initial Draw ---
+        window.onload = () => {
+             redraw(); // Draw initially
+        };
+
+    </script>
+</body>
+</html>

@@ -1,489 +1,472 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2575.4">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Menlo; color: #cacaca; -webkit-text-stroke: #cacaca}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Menlo; color: #cacaca; -webkit-text-stroke: #cacaca; min-height: 16.0px}
-    span.s1 {font-kerning: none}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <title>Flappy Bird - Progressive Speed</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        /* Basic reset and body styling */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #87CEEB; /* Sky blue background */
+            margin: 0;
+            font-family: 'Press Start 2P', cursive; /* Arcade font */
+            overflow: hidden; /* Prevent scrollbars */
+            flex-direction: column; /* Stack canvas and controls */
+        }
+
+        /* Game canvas styling */
+        #gameCanvas {
+            border: 5px solid #333;
+            background-color: #87CEEB; /* Match body background */
+            display: block; /* Remove extra space below canvas */
+            max-width: 90%; /* Make canvas responsive */
+            max-height: 80vh; /* Limit height */
+            /* Keep wider aspect ratio */
+            aspect-ratio: 800 / 600; /* Wider aspect ratio (4:3) */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2); /* Add some shadow */
+            border-radius: 10px; /* Rounded corners */
+            cursor: pointer; /* Indicate clickable */
+        }
+
+        /* Controls and score display styling */
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+            color: #fff;
+            text-shadow: 2px 2px #000;
+            /* Arrange scores side-by-side */
+            display: flex;
+            justify-content: center;
+            gap: 30px; /* Space between current and high score */
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+        }
+
+        /* Score display styling */
+        #score {
+            font-size: 1.5rem;
+        }
+
+        /* High score display styling */
+        #highScoreDisplay {
+            font-size: 1.5rem; /* Match score size */
+        }
+
+        /* Button styling */
+        button {
+            font-family: 'Press Start 2P', cursive;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            background-color: #4CAF50; /* Green */
+            color: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 5px #999;
+            transition: all 0.1s ease;
+            margin-top: 10px;
+        }
+
+        button:active {
+            box-shadow: 0 2px #666;
+            transform: translateY(4px);
+        }
+
+        /* Game over message styling */
+        #gameOverMessage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            display: none; /* Hidden by default */
+            z-index: 10; /* Ensure it's above the canvas */
+            border: 3px solid #fff;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+         #gameOverMessage h2 {
+            margin-bottom: 15px;
+         }
+         #gameOverMessage p {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+         }
+
+    </style>
 </head>
 <body>
-<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
-<p class="p1"><span class="s1">&lt;html lang="en"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;head&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;title&gt;Flappy Bird - Progressive Speed&lt;/title&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap" rel="stylesheet"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;style&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* Basic reset and body styling */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>body {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: flex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>justify-content: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>align-items: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>min-height: 100vh;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background-color: #87CEEB; /* Sky blue background */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin: 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-family: 'Press Start 2P', cursive; /* Arcade font */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>overflow: hidden; /* Prevent scrollbars */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>flex-direction: column; /* Stack canvas and controls */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* Game canvas styling */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>#gameCanvas {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border: 5px solid #333;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background-color: #87CEEB; /* Match body background */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: block; /* Remove extra space below canvas */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>max-width: 90%; /* Make canvas responsive */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>max-height: 80vh; /* Limit height */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>/* Keep wider aspect ratio */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>aspect-ratio: 800 / 600; /* Wider aspect ratio (4:3) */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>box-shadow: 0 10px 20px rgba(0,0,0,0.2); /* Add some shadow */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border-radius: 10px; /* Rounded corners */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>cursor: pointer; /* Indicate clickable */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* Controls and score display styling */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>.controls {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin-top: 20px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>text-align: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>color: #fff;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>text-shadow: 2px 2px #000;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>/* Arrange scores side-by-side */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: flex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>justify-content: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>gap: 30px; /* Space between current and high score */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>flex-wrap: wrap; /* Allow wrapping on small screens */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* Score display styling */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>#score {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-size: 1.5rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* High score display styling */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>#highScoreDisplay {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-size: 1.5rem; /* Match score size */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* Button styling */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>button {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-family: 'Press Start 2P', cursive;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>padding: 10px 20px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-size: 1rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>cursor: pointer;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background-color: #4CAF50; /* Green */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>color: white;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border: 2px solid #333;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border-radius: 8px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>box-shadow: 0 5px #999;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>transition: all 0.1s ease;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin-top: 10px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>button:active {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>box-shadow: 0 2px #666;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>transform: translateY(4px);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>/* Game over message styling */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>#gameOverMessage {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>position: absolute;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>top: 50%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>left: 50%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>transform: translate(-50%, -50%);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>background-color: rgba(0, 0, 0, 0.7);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>color: white;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>padding: 30px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border-radius: 15px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>text-align: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>display: none; /* Hidden by default */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>z-index: 10; /* Ensure it's above the canvas */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>border: 3px solid #fff;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">         </span>#gameOverMessage h2 {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin-bottom: 15px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">         </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">         </span>#gameOverMessage p {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>margin-bottom: 20px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>font-size: 1.2rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">         </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
-<p class="p1"><span class="s1">&lt;body&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;canvas id="gameCanvas" width="600" height="450"&gt;&lt;/canvas&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="controls"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div id="score"&gt;Score: 0&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div id="highScoreDisplay"&gt;High Score: 0&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="gameOverMessage"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;h2&gt;Game Over!&lt;/h2&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;p id="finalScore"&gt;Your Score: 0&lt;/p&gt;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;button id="restartButton"&gt;Restart&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Get canvas and context</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const canvas = document.getElementById('gameCanvas');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const ctx = canvas.getContext('2d');</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Get DOM elements</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const scoreDisplay = document.getElementById('score');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const gameOverMessage = document.getElementById('gameOverMessage');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const finalScoreDisplay = document.getElementById('finalScore');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const restartButton = document.getElementById('restartButton');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const highScoreDisplay = document.getElementById('highScoreDisplay');</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Game variables</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let birdX = 50;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let birdY = canvas.height / 2 - 15; // Start in middle</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let birdWidth = 30;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let birdHeight = 30;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let birdVelocity = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const gravity = 0.3; // Gravity effect</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const flapStrength = -5; // How high the bird flaps (Less bounce)</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let pipes = []; // Array to hold pipe objects</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let pipeWidth = 60; // Pipe width</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let pipeGap = 180; // Gap between top and bottom pipes (Wider gap)</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// *** Speed variables ***</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let basePipeSpeed = 4; // Base speed, adjusted by resize</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let speedIncrement = 0; // Additional speed gained from score</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const speedIncrementAmount = 0.3; // How much speed increases per milestone</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const scoreMilestone = 15; // Score needed to increase speed</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let pipeSpawnRate = 180; // How often new pipes spawn (in frames)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let frameCount = 0; // Counter for spawning pipes</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let score = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let highScore = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let gameRunning = true;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let animationFrameId; // To control the game loop</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// --- Bird Object (Square Bird) ---</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const bird = {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>x: birdX,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>y: birdY,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>width: birdWidth,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>height: birdHeight,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>velocity: birdVelocity,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>color: '#FFD700', // Yellow bird</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>draw: function() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>// Draw square bird representation</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>ctx.fillStyle = this.color;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>ctx.fillRect(this.x, this.y, this.width, this.height);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>// Basic eye (optional detail)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>ctx.fillStyle = '#000';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>ctx.fillRect(this.x + this.width * 0.6, this.y + this.height * 0.2, 5, 5);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>},</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>update: function() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>this.velocity += gravity; // Apply gravity</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>this.y += this.velocity; // Update position based on velocity</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>// Prevent bird from going off top/bottom edges</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (this.y &lt; 0) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>this.y = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>this.velocity = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (this.y + this.height &gt; canvas.height) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>// Hit ground</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>gameOver();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>},</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>flap: function() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (gameRunning) { // Only flap if game is running</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>this.velocity = flapStrength; // Give upward boost</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// --- Pipe Functions ---</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function spawnPipe() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Calculate the height of the top pipe randomly</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const minPipeHeight = 40; // Min height for top or bottom pipe section</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const maxTopPipeHeight = canvas.height - pipeGap - minPipeHeight;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const effectiveMaxTopPipeHeight = Math.max(minPipeHeight, maxTopPipeHeight);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const topPipeHeight = Math.random() * (effectiveMaxTopPipeHeight - minPipeHeight) + minPipeHeight;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const bottomPipeY = topPipeHeight + pipeGap;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>pipes.push({</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>x: canvas.width, // Start off-screen right</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>y: 0,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>width: pipeWidth,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>height: topPipeHeight,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>isTop: true</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>pipes.push({</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>x: canvas.width, // Start off-screen right</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>y: bottomPipeY,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>width: pipeWidth,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>height: canvas.height - bottomPipeY,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>isTop: false,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>scored: false</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function updatePipes() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// *** Calculate current effective pipe speed ***</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const currentPipeSpeed = basePipeSpeed + speedIncrement;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>for (let i = pipes.length - 1; i &gt;= 0; i--) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>// *** Use current effective speed ***</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>pipes[i].x -= currentPipeSpeed; // Move pipe left</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>// Draw the pipe</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>drawPipe(pipes[i]);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>// Collision detection with square bird</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>bird.x &lt; pipes[i].x + pipes[i].width &amp;&amp;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>bird.x + bird.width &gt; pipes[i].x &amp;&amp;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>bird.y &lt; pipes[i].y + pipes[i].height &amp;&amp;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>bird.y + bird.height &gt; pipes[i].y</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>gameOver();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>return; // Stop checking once collision detected</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>// Score increment: Check if bird passed the pipe (bottom pipe only)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (!pipes[i].isTop &amp;&amp; !pipes[i].scored &amp;&amp; pipes[i].x + pipes[i].width &lt; bird.x) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>score++;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>pipes[i].scored = true; // Mark as scored</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>scoreDisplay.textContent = `Score: ${score}`;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>// *** Check for score milestone to increase speed ***</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>if (score &gt; 0 &amp;&amp; score % scoreMilestone === 0) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>speedIncrement += speedIncrementAmount;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>// Optional: Log speed increase for debugging</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>// console.log(`Score milestone reached! Speed increment increased to: ${speedIncrement}`);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>// Remove pipes that have gone off-screen</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (pipes[i].x + pipes[i].width &lt; 0) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>pipes.splice(i, 1);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Function to draw Mario-style pipes</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function drawPipe(pipe) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const mainPipeColor = '#228B22'; // ForestGreen</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const rimColor = '#32CD32'; // LimeGreen</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const borderColor = '#006400'; // DarkGreen</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const rimHeight = 20;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const rimOverhang = 5; // How much wider the rim is on each side</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>ctx.lineWidth = 2;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>ctx.strokeStyle = borderColor;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (pipe.isTop) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>// Draw main shaft (top pipe)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>ctx.fillStyle = mainPipeColor;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>ctx.fillRect(pipe.x, pipe.y, pipe.width, pipe.height - rimHeight);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>ctx.strokeRect(pipe.x, pipe.y, pipe.width, pipe.height - rimHeight);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>// Draw rim (bottom edge of top pipe)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>ctx.fillStyle = rimColor;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>ctx.fillRect(pipe.x - rimOverhang, pipe.height - rimHeight, pipe.width + 2 * rimOverhang, rimHeight);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>ctx.strokeRect(pipe.x - rimOverhang, pipe.height - rimHeight, pipe.width + 2 * rimOverhang, rimHeight);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>// Draw main shaft (bottom pipe)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>ctx.fillStyle = mainPipeColor;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>ctx.fillRect(pipe.x, pipe.y + rimHeight, pipe.width, pipe.height - rimHeight);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>ctx.strokeRect(pipe.x, pipe.y + rimHeight, pipe.width, pipe.height - rimHeight);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>// Draw rim (top edge of bottom pipe)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>ctx.fillStyle = rimColor;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>ctx.fillRect(pipe.x - rimOverhang, pipe.y, pipe.width + 2 * rimOverhang, rimHeight);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>ctx.strokeRect(pipe.x - rimOverhang, pipe.y, pipe.width + 2 * rimOverhang, rimHeight);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// --- Game Over Function ---</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function gameOver() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (!gameRunning) return; // Prevent multiple calls</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>gameRunning = false;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>cancelAnimationFrame(animationFrameId); // Stop the game loop</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>finalScoreDisplay.textContent = `Your Score: ${score}`;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Check and update high score</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (score &gt; highScore) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>highScore = score;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>localStorage.setItem('flappyBirdHighScore', highScore.toString()); // Store as string</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>highScoreDisplay.textContent = `High Score: ${highScore}`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>finalScoreDisplay.textContent += " (New High Score!)";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>gameOverMessage.style.display = 'block'; // Show game over message</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Disable flapping on game over screen</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>canvas.removeEventListener('click', bird.flap);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.removeEventListener('keydown', handleKeyPress);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// --- Reset Game Function ---</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function resetGame() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Reset bird position and velocity</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>bird.y = canvas.height / 2 - bird.height / 2; // Recenter vertically</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>bird.velocity = 0;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Clear pipes array</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>pipes = [];</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Reset score and frame count</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>score = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>frameCount = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>scoreDisplay.textContent = `Score: ${score}`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// *** Reset speed increment ***</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>speedIncrement = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Ensure high score display is correct on reset</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>highScoreDisplay.textContent = `High Score: ${highScore}`;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Hide game over message</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>gameOverMessage.style.display = 'none';</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Re-enable controls</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>addEventListeners();</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Start the game loop again</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>gameRunning = true;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>gameLoop();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// --- Game Loop ---</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function gameLoop() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (!gameRunning) return;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// 1. Clear the canvas</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>ctx.clearRect(0, 0, canvas.width, canvas.height);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// 2. Update and Draw Bird</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>bird.update();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>bird.draw();</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// 3. Spawn new pipes periodically</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>frameCount++;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (frameCount % pipeSpawnRate === 0) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>spawnPipe();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// 4. Update and Draw Pipes (now uses progressive speed)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>updatePipes();</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// 5. Request next frame</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>animationFrameId = requestAnimationFrame(gameLoop);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// --- Event Listeners ---</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function handleKeyPress(event) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">             </span>// Allow flap with Space bar or Up Arrow</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (event.code === 'Space' || event.code === 'ArrowUp') {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>event.preventDefault(); // Prevent space bar scrolling</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>bird.flap();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function addEventListeners() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>canvas.addEventListener('click', bird.flap);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>document.addEventListener('keydown', handleKeyPress);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// --- Initialization ---</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Function to load high score from localStorage</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function loadHighScore() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const storedHighScore = localStorage.getItem('flappyBirdHighScore');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (storedHighScore) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>highScore = parseInt(storedHighScore, 10);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                 </span>if (isNaN(highScore)) { highScore = 0; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>highScore = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>highScoreDisplay.textContent = `High Score: ${highScore}`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>restartButton.addEventListener('click', resetGame);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>addEventListeners(); // Add gameplay listeners</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// --- Canvas Resizing ---</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>function resizeCanvas() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const aspectRatio = 800 / 600; // Wider 4:3 ratio</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let newWidth = window.innerWidth * 0.9;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>let newHeight = window.innerHeight * 0.8;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (newWidth / newHeight &gt; aspectRatio) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>newWidth = newHeight * aspectRatio;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>newHeight = newWidth / aspectRatio;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>newWidth = Math.max(300, newWidth);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>newHeight = Math.max(225, newHeight);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>canvas.width = newWidth;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>canvas.height = newHeight;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Re-calculate relative elements</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>bird.y = canvas.height / 2 - bird.height / 2;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>pipeGap = canvas.height / 2.5;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>pipeWidth = canvas.width / 10;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>bird.x = canvas.width / 8;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// *** Calculate base pipe speed based on width ***</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>basePipeSpeed = canvas.width / 120; // Faster speed scaling</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Adjust spawn rate relative to base speed?</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>pipeSpawnRate = Math.max(100, Math.floor(canvas.width / basePipeSpeed / 2.0));</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">             </span>// Redraw immediately after resize</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">             </span>if (gameRunning) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                 </span>ctx.clearRect(0, 0, canvas.width, canvas.height);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                 </span>bird.draw();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                 </span>pipes.forEach(drawPipe);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">             </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                 </span>// Redraw final state if game over</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                 </span>gameOverMessage.style.top = '50%';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                 </span>gameOverMessage.style.left = '50%';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                 </span>gameOverMessage.style.transform = 'translate(-50%, -50%)';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                 </span>ctx.clearRect(0, 0, canvas.width, canvas.height);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                 </span>bird.draw();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                 </span>pipes.forEach(drawPipe);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">             </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>window.addEventListener('resize', resizeCanvas);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// --- Initial Setup ---</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>loadHighScore(); // Load high score when the script runs</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>resizeCanvas(); // Set initial canvas size and base speed</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>if (gameRunning) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">             </span>gameLoop(); // Start the game loop</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+
+    
+    <canvas id="gameCanvas" width="600" height="450"></canvas>
+
+    <div class="controls">
+        <div id="score">Score: 0</div>
+        
+        <div id="highScoreDisplay">High Score: 0</div>
+    </div>
+
+    <div id="gameOverMessage">
+        <h2>Game Over!</h2>
+        <p id="finalScore">Your Score: 0</p>
+        
+        <button id="restartButton">Restart</button>
+    </div>
+
+    <script>
+        // Get canvas and context
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Get DOM elements
+        const scoreDisplay = document.getElementById('score');
+        const gameOverMessage = document.getElementById('gameOverMessage');
+        const finalScoreDisplay = document.getElementById('finalScore');
+        const restartButton = document.getElementById('restartButton');
+        const highScoreDisplay = document.getElementById('highScoreDisplay');
+
+
+        // Game variables
+        let birdX = 50;
+        let birdY = canvas.height / 2 - 15; // Start in middle
+        let birdWidth = 30;
+        let birdHeight = 30;
+        let birdVelocity = 0;
+        const gravity = 0.3; // Gravity effect
+        const flapStrength = -5; // How high the bird flaps (Less bounce)
+
+        let pipes = []; // Array to hold pipe objects
+        let pipeWidth = 60; // Pipe width
+        let pipeGap = 180; // Gap between top and bottom pipes (Wider gap)
+
+        // *** Speed variables ***
+        let basePipeSpeed = 4; // Base speed, adjusted by resize
+        let speedIncrement = 0; // Additional speed gained from score
+        const speedIncrementAmount = 0.3; // How much speed increases per milestone
+        const scoreMilestone = 15; // Score needed to increase speed
+
+        let pipeSpawnRate = 180; // How often new pipes spawn (in frames)
+        let frameCount = 0; // Counter for spawning pipes
+        let score = 0;
+        let highScore = 0;
+        let gameRunning = true;
+        let animationFrameId; // To control the game loop
+
+        // --- Bird Object (Square Bird) ---
+        const bird = {
+            x: birdX,
+            y: birdY,
+            width: birdWidth,
+            height: birdHeight,
+            velocity: birdVelocity,
+            color: '#FFD700', // Yellow bird
+
+            draw: function() {
+                // Draw square bird representation
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+
+                // Basic eye (optional detail)
+                ctx.fillStyle = '#000';
+                ctx.fillRect(this.x + this.width * 0.6, this.y + this.height * 0.2, 5, 5);
+            },
+
+            update: function() {
+                this.velocity += gravity; // Apply gravity
+                this.y += this.velocity; // Update position based on velocity
+
+                // Prevent bird from going off top/bottom edges
+                if (this.y < 0) {
+                    this.y = 0;
+                    this.velocity = 0;
+                }
+                if (this.y + this.height > canvas.height) {
+                    // Hit ground
+                    gameOver();
+                }
+            },
+
+            flap: function() {
+                if (gameRunning) { // Only flap if game is running
+                    this.velocity = flapStrength; // Give upward boost
+                }
+            }
+        };
+
+        // --- Pipe Functions ---
+        function spawnPipe() {
+            // Calculate the height of the top pipe randomly
+            const minPipeHeight = 40; // Min height for top or bottom pipe section
+            const maxTopPipeHeight = canvas.height - pipeGap - minPipeHeight;
+            const effectiveMaxTopPipeHeight = Math.max(minPipeHeight, maxTopPipeHeight);
+            const topPipeHeight = Math.random() * (effectiveMaxTopPipeHeight - minPipeHeight) + minPipeHeight;
+            const bottomPipeY = topPipeHeight + pipeGap;
+
+            pipes.push({
+                x: canvas.width, // Start off-screen right
+                y: 0,
+                width: pipeWidth,
+                height: topPipeHeight,
+                isTop: true
+            });
+
+            pipes.push({
+                x: canvas.width, // Start off-screen right
+                y: bottomPipeY,
+                width: pipeWidth,
+                height: canvas.height - bottomPipeY,
+                isTop: false,
+                scored: false
+            });
+        }
+
+        function updatePipes() {
+            // *** Calculate current effective pipe speed ***
+            const currentPipeSpeed = basePipeSpeed + speedIncrement;
+
+            for (let i = pipes.length - 1; i >= 0; i--) {
+                // *** Use current effective speed ***
+                pipes[i].x -= currentPipeSpeed; // Move pipe left
+
+                // Draw the pipe
+                drawPipe(pipes[i]);
+
+                // Collision detection with square bird
+                if (
+                    bird.x < pipes[i].x + pipes[i].width &&
+                    bird.x + bird.width > pipes[i].x &&
+                    bird.y < pipes[i].y + pipes[i].height &&
+                    bird.y + bird.height > pipes[i].y
+                ) {
+                    gameOver();
+                    return; // Stop checking once collision detected
+                }
+
+
+                // Score increment: Check if bird passed the pipe (bottom pipe only)
+                if (!pipes[i].isTop && !pipes[i].scored && pipes[i].x + pipes[i].width < bird.x) {
+                    score++;
+                    pipes[i].scored = true; // Mark as scored
+                    scoreDisplay.textContent = `Score: ${score}`;
+
+                    // *** Check for score milestone to increase speed ***
+                    if (score > 0 && score % scoreMilestone === 0) {
+                        speedIncrement += speedIncrementAmount;
+                        // Optional: Log speed increase for debugging
+                        // console.log(`Score milestone reached! Speed increment increased to: ${speedIncrement}`);
+                    }
+                }
+
+                // Remove pipes that have gone off-screen
+                if (pipes[i].x + pipes[i].width < 0) {
+                    pipes.splice(i, 1);
+                }
+            }
+        }
+
+        // Function to draw Mario-style pipes
+        function drawPipe(pipe) {
+            const mainPipeColor = '#228B22'; // ForestGreen
+            const rimColor = '#32CD32'; // LimeGreen
+            const borderColor = '#006400'; // DarkGreen
+            const rimHeight = 20;
+            const rimOverhang = 5; // How much wider the rim is on each side
+
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = borderColor;
+
+            if (pipe.isTop) {
+                // Draw main shaft (top pipe)
+                ctx.fillStyle = mainPipeColor;
+                ctx.fillRect(pipe.x, pipe.y, pipe.width, pipe.height - rimHeight);
+                ctx.strokeRect(pipe.x, pipe.y, pipe.width, pipe.height - rimHeight);
+
+                // Draw rim (bottom edge of top pipe)
+                ctx.fillStyle = rimColor;
+                ctx.fillRect(pipe.x - rimOverhang, pipe.height - rimHeight, pipe.width + 2 * rimOverhang, rimHeight);
+                ctx.strokeRect(pipe.x - rimOverhang, pipe.height - rimHeight, pipe.width + 2 * rimOverhang, rimHeight);
+            } else {
+                // Draw main shaft (bottom pipe)
+                ctx.fillStyle = mainPipeColor;
+                ctx.fillRect(pipe.x, pipe.y + rimHeight, pipe.width, pipe.height - rimHeight);
+                ctx.strokeRect(pipe.x, pipe.y + rimHeight, pipe.width, pipe.height - rimHeight);
+
+                // Draw rim (top edge of bottom pipe)
+                ctx.fillStyle = rimColor;
+                ctx.fillRect(pipe.x - rimOverhang, pipe.y, pipe.width + 2 * rimOverhang, rimHeight);
+                ctx.strokeRect(pipe.x - rimOverhang, pipe.y, pipe.width + 2 * rimOverhang, rimHeight);
+            }
+        }
+
+        // --- Game Over Function ---
+        function gameOver() {
+            if (!gameRunning) return; // Prevent multiple calls
+            gameRunning = false;
+            cancelAnimationFrame(animationFrameId); // Stop the game loop
+            finalScoreDisplay.textContent = `Your Score: ${score}`;
+
+            // Check and update high score
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('flappyBirdHighScore', highScore.toString()); // Store as string
+                highScoreDisplay.textContent = `High Score: ${highScore}`;
+                finalScoreDisplay.textContent += " (New High Score!)";
+            }
+
+            gameOverMessage.style.display = 'block'; // Show game over message
+            // Disable flapping on game over screen
+            canvas.removeEventListener('click', bird.flap);
+            document.removeEventListener('keydown', handleKeyPress);
+        }
+
+        // --- Reset Game Function ---
+        function resetGame() {
+            // Reset bird position and velocity
+            bird.y = canvas.height / 2 - bird.height / 2; // Recenter vertically
+            bird.velocity = 0;
+
+            // Clear pipes array
+            pipes = [];
+
+            // Reset score and frame count
+            score = 0;
+            frameCount = 0;
+            scoreDisplay.textContent = `Score: ${score}`;
+            // *** Reset speed increment ***
+            speedIncrement = 0;
+            // Ensure high score display is correct on reset
+            highScoreDisplay.textContent = `High Score: ${highScore}`;
+
+            // Hide game over message
+            gameOverMessage.style.display = 'none';
+
+            // Re-enable controls
+            addEventListeners();
+
+            // Start the game loop again
+            gameRunning = true;
+            gameLoop();
+        }
+
+        // --- Game Loop ---
+        function gameLoop() {
+            if (!gameRunning) return;
+
+            // 1. Clear the canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 2. Update and Draw Bird
+            bird.update();
+            bird.draw();
+
+            // 3. Spawn new pipes periodically
+            frameCount++;
+            if (frameCount % pipeSpawnRate === 0) {
+                spawnPipe();
+            }
+
+            // 4. Update and Draw Pipes (now uses progressive speed)
+            updatePipes();
+
+            // 5. Request next frame
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        // --- Event Listeners ---
+        function handleKeyPress(event) {
+             // Allow flap with Space bar or Up Arrow
+            if (event.code === 'Space' || event.code === 'ArrowUp') {
+                event.preventDefault(); // Prevent space bar scrolling
+                bird.flap();
+            }
+        }
+
+        function addEventListeners() {
+            canvas.addEventListener('click', bird.flap);
+            document.addEventListener('keydown', handleKeyPress);
+        }
+
+        // --- Initialization ---
+
+        // Function to load high score from localStorage
+        function loadHighScore() {
+            const storedHighScore = localStorage.getItem('flappyBirdHighScore');
+            if (storedHighScore) {
+                highScore = parseInt(storedHighScore, 10);
+                 if (isNaN(highScore)) { highScore = 0; }
+            } else {
+                highScore = 0;
+            }
+            highScoreDisplay.textContent = `High Score: ${highScore}`;
+        }
+
+        restartButton.addEventListener('click', resetGame);
+        addEventListeners(); // Add gameplay listeners
+
+        // --- Canvas Resizing ---
+        function resizeCanvas() {
+            const aspectRatio = 800 / 600; // Wider 4:3 ratio
+            let newWidth = window.innerWidth * 0.9;
+            let newHeight = window.innerHeight * 0.8;
+
+            if (newWidth / newHeight > aspectRatio) {
+                newWidth = newHeight * aspectRatio;
+            } else {
+                newHeight = newWidth / aspectRatio;
+            }
+
+            newWidth = Math.max(300, newWidth);
+            newHeight = Math.max(225, newHeight);
+
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+
+            // Re-calculate relative elements
+            bird.y = canvas.height / 2 - bird.height / 2;
+            pipeGap = canvas.height / 2.5;
+            pipeWidth = canvas.width / 10;
+            bird.x = canvas.width / 8;
+            // *** Calculate base pipe speed based on width ***
+            basePipeSpeed = canvas.width / 120; // Faster speed scaling
+            // Adjust spawn rate relative to base speed?
+            pipeSpawnRate = Math.max(100, Math.floor(canvas.width / basePipeSpeed / 2.0));
+
+             // Redraw immediately after resize
+             if (gameRunning) {
+                 ctx.clearRect(0, 0, canvas.width, canvas.height);
+                 bird.draw();
+                 pipes.forEach(drawPipe);
+             } else {
+                 // Redraw final state if game over
+                 gameOverMessage.style.top = '50%';
+                 gameOverMessage.style.left = '50%';
+                 gameOverMessage.style.transform = 'translate(-50%, -50%)';
+                 ctx.clearRect(0, 0, canvas.width, canvas.height);
+                 bird.draw();
+                 pipes.forEach(drawPipe);
+             }
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        // --- Initial Setup ---
+        loadHighScore(); // Load high score when the script runs
+        resizeCanvas(); // Set initial canvas size and base speed
+        if (gameRunning) {
+             gameLoop(); // Start the game loop
+        }
+
+    </script>
+
 </body>
-</html>
+</html> 
